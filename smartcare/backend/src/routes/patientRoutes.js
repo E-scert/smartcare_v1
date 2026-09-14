@@ -6,15 +6,20 @@ import {
   getPatients,
   getPatientById,
   updatePatient,
-  deletePatient
+  deletePatient,
 } from "../controllers/patientController.js";
 
 const router = express.Router();
 
 router.post("/", authenticate, authorize("ADMIN"), createPatient);
-router.get("/", authenticate, getPatients);
+router.get(
+  "/",
+  authenticate,
+  authorize("ADMIN", "DOCTOR", "NURSE", "RECEPTIONIST"),
+  getPatients,
+);
 router.get("/:id", authenticate, getPatientById);
-router.put("/:id", authenticate, authorize("ADMIN","DOCTOR"), updatePatient);
+router.put("/:id", authenticate, authorize("ADMIN", "DOCTOR"), updatePatient);
 router.delete("/:id", authenticate, authorize("ADMIN"), deletePatient);
 
 export default router;

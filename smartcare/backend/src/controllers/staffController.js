@@ -26,6 +26,18 @@ export const getStaffById = async (req, res) => {
   try {
     const staff = await Staff.findByPk(req.params.id);
     if (!staff) return res.status(404).json({ error: "Staff not found" });
+
+    if (req.user.role !== "ADMIN" && req.user.id !== staff.user_id) {
+      return res.status(403).json({
+        error: "Forbidden: cannot view other staff records",
+      });
+    }
+
+    if (req.user.role !== "ADMIN" && req.user.id !== staff.user_id) {
+      return res.status(403).json({
+        error: "Forbidden: cannot view other staff records",
+      });
+    }
     res.json(staff);
   } catch (err) {
     res.status(500).json({ error: err.message });

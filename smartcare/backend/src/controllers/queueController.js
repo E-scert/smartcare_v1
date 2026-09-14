@@ -1,5 +1,7 @@
 // src/controllers/queueController.js
 import Queue from "../models/queueModel.js";
+import Appointment from "../models/appointmentModel.js";
+import { findPatientByUserId } from "../utils/resolvePatient.js";
 
 // CREATE Queue entry
 export const createQueue = async (req, res) => {
@@ -26,6 +28,24 @@ export const getQueueById = async (req, res) => {
   try {
     const queue = await Queue.findByPk(req.params.id);
     if (!queue) return res.status(404).json({ error: "Queue entry not found" });
+
+    if (req.user.role === "PATIENT") {
+      const patient = await findPatientByUserId(req.user.id);
+
+      if (!patient) {
+        return res.status(404).json({
+          error: "Patient profile not found",
+        });
+      }
+
+      const appointment = await Appointment.findByPk(queue.appointment_id);
+
+      if (!appointment || appointment.patient_id !== patient.id) {
+        return res.status(403).json({
+          error: "Forbidden: cannot view other patients' queue entries",
+        });
+      }
+    }
     res.json(queue);
   } catch (err) {
     res.status(500).json({ error: err.message });

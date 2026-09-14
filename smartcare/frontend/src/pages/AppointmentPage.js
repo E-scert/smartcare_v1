@@ -3,10 +3,8 @@ import API from "../services/api";
 
 export default function AppointmentPage() {
   const [form, setForm] = useState({
-    department_id: "",
     appointment_date: "",
     appointment_time: "",
-    priority_level: "NORMAL",
   });
   const [departments, setDepartments] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -66,26 +64,6 @@ export default function AppointmentPage() {
         {error && <div className="alert alert-error">{error}</div>}
         {success && <div className="alert alert-success">{success}</div>}
 
-        <div className="form-group">
-          <label className="form-label" htmlFor="department_id">
-            Department
-          </label>
-          <select
-            id="department_id"
-            className="form-select"
-            name="department_id"
-            value={form.department_id}
-            onChange={handleChange}
-          >
-            <option value="">Select Department</option>
-            {departments.map((d) => (
-              <option key={d.id} value={d.id}>
-                {d.name}
-              </option>
-            ))}
-          </select>
-        </div>
-
         <div className="form-row">
           <div className="form-group">
             <label className="form-label" htmlFor="appointment_date">
@@ -113,22 +91,6 @@ export default function AppointmentPage() {
               onChange={handleChange}
             />
           </div>
-        </div>
-
-        <div className="form-group">
-          <label className="form-label" htmlFor="priority_level">
-            Priority
-          </label>
-          <select
-            id="priority_level"
-            className="form-select"
-            name="priority_level"
-            value={form.priority_level}
-            onChange={handleChange}
-          >
-            <option value="NORMAL">Normal</option>
-            <option value="HIGH">High</option>
-          </select>
         </div>
 
         <button

@@ -1,22 +1,61 @@
 // src/controllers/appointmentController.js
 import Appointment from "../models/appointmentModel.js";
 import { findPatientByUserId } from "../utils/resolvePatient.js";
+import Assessment from "../models/assessmentModel.js";
+import Department from "../models/departmentModel.js";
 
 // CREATE Appointment
 export const createAppointment = async (req, res) => {
   try {
     const payload = { ...req.body };
 
-    // A patient can only ever book for themselves — resolve their own
-    // patient record server-side rather than trusting a patient_id sent
-    // from the client (which would let one patient book as another).
     if (req.user.role === "PATIENT") {
       const patient = await findPatientByUserId(req.user.id);
       if (!patient) {
-        return res.status(400).json({ error: "No patient profile found for this account. Complete patient registration first." });
+        return res.status(400).json({
+          error:
+            "No patient profile found for this account. Complete patient registration first.",
+        });
       }
       payload.patient_id = patient.id;
+      if (!payload.assessment_id) {
+        return res.status(400).json({
+          error: "Assessment is required before booking an appointment",
+        });
+      }
+
+      const assessment = await Assessment.findByPk(payload.assessment_id);
+
+      if (!assessment) {
+        return res.status(404).json({
+          error: "Assessment not found",
+        });
+      }
     }
+
+    if (assessment.patient_id !== patient.id) {
+      return res.status(403).json({
+        error: "Assessment does not belong to this patient",
+      });
+    }
+
+    payload.priority_level = assessment.priority_level;
+
+    const department = await Department.findOne({
+      where: {
+        name: assessment.recommended_service,
+      },
+    });
+
+    if (!department) {
+      return res.status(400).json({
+        error: "Recommended department not found",
+      });
+    }
+
+    payload.department_id = department.id;
+
+    payload.recommended_service = assessment.recommended_service;
 
     const appointment = await Appointment.create(payload);
     res.status(201).json(appointment);
@@ -39,12 +78,15 @@ export const getAppointments = async (req, res) => {
 export const getAppointmentById = async (req, res) => {
   try {
     const appointment = await Appointment.findByPk(req.params.id);
-    if (!appointment) return res.status(404).json({ error: "Appointment not found" });
+    if (!appointment)
+      return res.status(404).json({ error: "Appointment not found" });
 
     if (req.user.role === "PATIENT") {
       const patient = await findPatientByUserId(req.user.id);
       if (!patient || patient.id !== appointment.patient_id) {
-        return res.status(403).json({ error: "Forbidden: cannot view other patients' appointments" });
+        return res.status(403).json({
+          error: "Forbidden: cannot view other patients' appointments",
+        });
       }
     }
 
@@ -58,7 +100,8 @@ export const getAppointmentById = async (req, res) => {
 export const updateAppointment = async (req, res) => {
   try {
     const appointment = await Appointment.findByPk(req.params.id);
-    if (!appointment) return res.status(404).json({ error: "Appointment not found" });
+    if (!appointment)
+      return res.status(404).json({ error: "Appointment not found" });
     await appointment.update(req.body);
     res.json(appointment);
   } catch (err) {
@@ -70,7 +113,8 @@ export const updateAppointment = async (req, res) => {
 export const deleteAppointment = async (req, res) => {
   try {
     const appointment = await Appointment.findByPk(req.params.id);
-    if (!appointment) return res.status(404).json({ error: "Appointment not found" });
+    if (!appointment)
+      return res.status(404).json({ error: "Appointment not found" });
     await appointment.destroy();
     res.json({ message: "Appointment deleted" });
   } catch (err) {

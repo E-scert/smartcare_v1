@@ -10,12 +10,37 @@ export const createAssessment = async (req, res) => {
     if (req.user.role === "PATIENT") {
       const patient = await findPatientByUserId(req.user.id);
       if (!patient) {
-        return res.status(400).json({ error: "No patient profile found for this account. Complete patient registration first." });
+        return res.status(400).json({
+          error:
+            "No patient profile found for this account. Complete patient registration first.",
+        });
       }
       payload.patient_id = patient.id;
     }
 
+    const symptoms = payload.symptoms || {};
+
+    let calculatedPriority = "STANDARD";
+    let calculatedService = "General Practice";
+
+    if (
+      symptoms.chestPain ||
+      symptoms.difficultyBreathing ||
+      symptoms.severeBleeding
+    ) {
+      calculatedPriority = "HIGH";
+      calculatedService = "Emergency";
+    } else if (symptoms.collectingMedication) {
+      calculatedPriority = "STANDARD";
+      calculatedService = "Pharmacy";
+    } else if (symptoms.fluSymptoms) {
+      calculatedPriority = "MEDIUM";
+      calculatedService = "General Practice";
+    }
+
     const assessment = await Assessment.create(payload);
+    payload.priority_level = calculatedPriority;
+    payload.recommended_service = calculatedService;
     res.status(201).json(assessment);
   } catch (err) {
     res.status(400).json({ error: err.message });
@@ -36,12 +61,15 @@ export const getAssessments = async (req, res) => {
 export const getAssessmentById = async (req, res) => {
   try {
     const assessment = await Assessment.findByPk(req.params.id);
-    if (!assessment) return res.status(404).json({ error: "Assessment not found" });
+    if (!assessment)
+      return res.status(404).json({ error: "Assessment not found" });
 
     if (req.user.role === "PATIENT") {
       const patient = await findPatientByUserId(req.user.id);
       if (!patient || patient.id !== assessment.patient_id) {
-        return res.status(403).json({ error: "Forbidden: cannot view other patients' assessments" });
+        return res.status(403).json({
+          error: "Forbidden: cannot view other patients' assessments",
+        });
       }
     }
 
@@ -55,7 +83,8 @@ export const getAssessmentById = async (req, res) => {
 export const updateAssessment = async (req, res) => {
   try {
     const assessment = await Assessment.findByPk(req.params.id);
-    if (!assessment) return res.status(404).json({ error: "Assessment not found" });
+    if (!assessment)
+      return res.status(404).json({ error: "Assessment not found" });
     await assessment.update(req.body);
     res.json(assessment);
   } catch (err) {
@@ -67,7 +96,8 @@ export const updateAssessment = async (req, res) => {
 export const deleteAssessment = async (req, res) => {
   try {
     const assessment = await Assessment.findByPk(req.params.id);
-    if (!assessment) return res.status(404).json({ error: "Assessment not found" });
+    if (!assessment)
+      return res.status(404).json({ error: "Assessment not found" });
     await assessment.destroy();
     res.json({ message: "Assessment deleted" });
   } catch (err) {
