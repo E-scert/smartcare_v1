@@ -6,7 +6,7 @@ export default function AppointmentPage() {
     department_id: "",
     appointment_date: "",
     appointment_time: "",
-    priority_level: "NORMAL"
+    priority_level: "NORMAL",
   });
   const [departments, setDepartments] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -30,7 +30,11 @@ export default function AppointmentPage() {
   };
 
   const handleBook = async () => {
-    if (!form.department_id || !form.appointment_date || !form.appointment_time) {
+    if (
+      !form.department_id ||
+      !form.appointment_date ||
+      !form.appointment_time
+    ) {
       setError("All fields are required");
       return;
     }
@@ -54,14 +58,18 @@ export default function AppointmentPage() {
       <div className="card">
         <div className="page-header">
           <h2>Book Appointment</h2>
-          <p className="page-subtitle">Choose a department and a time that works for you.</p>
+          <p className="page-subtitle">
+            Choose a department and a time that works for you.
+          </p>
         </div>
 
         {error && <div className="alert alert-error">{error}</div>}
         {success && <div className="alert alert-success">{success}</div>}
 
         <div className="form-group">
-          <label className="form-label" htmlFor="department_id">Department</label>
+          <label className="form-label" htmlFor="department_id">
+            Department
+          </label>
           <select
             id="department_id"
             className="form-select"
@@ -80,7 +88,9 @@ export default function AppointmentPage() {
 
         <div className="form-row">
           <div className="form-group">
-            <label className="form-label" htmlFor="appointment_date">Date</label>
+            <label className="form-label" htmlFor="appointment_date">
+              Date
+            </label>
             <input
               id="appointment_date"
               className="form-input"
@@ -91,7 +101,9 @@ export default function AppointmentPage() {
             />
           </div>
           <div className="form-group">
-            <label className="form-label" htmlFor="appointment_time">Time</label>
+            <label className="form-label" htmlFor="appointment_time">
+              Time
+            </label>
             <input
               id="appointment_time"
               className="form-input"
@@ -104,7 +116,9 @@ export default function AppointmentPage() {
         </div>
 
         <div className="form-group">
-          <label className="form-label" htmlFor="priority_level">Priority</label>
+          <label className="form-label" htmlFor="priority_level">
+            Priority
+          </label>
           <select
             id="priority_level"
             className="form-select"
@@ -117,7 +131,11 @@ export default function AppointmentPage() {
           </select>
         </div>
 
-        <button onClick={handleBook} className="btn btn-primary btn-block" disabled={loading}>
+        <button
+          onClick={handleBook}
+          className="btn btn-primary btn-block"
+          disabled={loading}
+        >
           {loading ? "Booking..." : "Book Appointment"}
         </button>
       </div>
