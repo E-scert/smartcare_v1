@@ -5,7 +5,6 @@ import API from "../services/api";
 export default function RegisterPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [role, setRole] = useState("PATIENT");
   const [error, setError] = useState(null);
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
@@ -19,7 +18,7 @@ export default function RegisterPage() {
     setLoading(true);
     setError(null);
     try {
-      await API.post("/auth/register", { email, password, role });
+      await API.post("/auth/register", { email, password });
       alert("Registration successful!");
       navigate("/login"); // cleaner redirect
     } catch (err) {
@@ -34,13 +33,17 @@ export default function RegisterPage() {
       <div className="card">
         <div className="page-header text-center">
           <h2>Create your account</h2>
-          <p className="page-subtitle">Join SmartCare to book and manage appointments.</p>
+          <p className="page-subtitle">
+            Join SmartCare to book and manage appointments.
+          </p>
         </div>
 
         {error && <div className="alert alert-error">{error}</div>}
 
         <div className="form-group">
-          <label className="form-label" htmlFor="email">Email</label>
+          <label className="form-label" htmlFor="email">
+            Email
+          </label>
           <input
             id="email"
             className="form-input"
@@ -51,7 +54,9 @@ export default function RegisterPage() {
         </div>
 
         <div className="form-group">
-          <label className="form-label" htmlFor="password">Password</label>
+          <label className="form-label" htmlFor="password">
+            Password
+          </label>
           <input
             id="password"
             className="form-input"
@@ -62,18 +67,13 @@ export default function RegisterPage() {
           />
         </div>
 
-        <div className="form-group">
-          <label className="form-label" htmlFor="role">I am a...</label>
-          <select id="role" className="form-select" value={role} onChange={(e) => setRole(e.target.value)}>
-            <option value="PATIENT">Patient</option>
-            <option value="DOCTOR">Doctor</option>
-            <option value="NURSE">Nurse</option>
-            <option value="RECEPTIONIST">Receptionist</option>
-            <option value="ADMIN">Admin</option>
-          </select>
-        </div>
+        <div className="form-group"></div>
 
-        <button onClick={handleRegister} className="btn btn-primary btn-block" disabled={loading}>
+        <button
+          onClick={handleRegister}
+          className="btn btn-primary btn-block"
+          disabled={loading}
+        >
           {loading ? "Creating account..." : "Register"}
         </button>
 
